@@ -1,0 +1,130 @@
+---
+title: "Exploring the NOAA's storm dataset"
+author: "Shikhar"
+date: "27/07/2020"
+output: 
+  html_document:
+    keep_md: true
+---
+# Introduction
+#### Storms and other severe weather events can cause both public health and economic problems for communities and municipalities. Many severe events can result in fatalities, injuries, and property damage, and preventing such outcomes to the extent possible is a key concern.
+
+
+# Sypnosis.
+#### The Goal of this Exploration of NOAA's storm Dataset is to analyze and find the answers of two basic questions : 
+#### 1.Across the United States, which types of events are most harmful with respect to population health?
+#### 2.Across the United States, which types of events have the greatest economic consequences?
+
+
+## 1.Addressing the problem finding which type of events are most harmful for Public Health
+
+
+### Checking and Processing of the data
+```{r}
+sessionInfo()
+rm(list=ls())
+setwd("D:/R/Class/5Reproducible Research/Assessment2")
+read <- read.csv("./repdata_data_StormData.csv.bz2")
+names(read)
+head(read)
+summary(read)
+read$EVTYPE <- as.factor(read$EVTYPE)
+```
+
+
+### Loading Packages
+```{r}
+ library(dplyr)
+```
+
+### Calculations and assigning values for Injuries and Fatalities Explicitly!
+```{r}
+forfatalities <- aggregate(FATALITIES ~ EVTYPE,read,"sum")
+forfatalities <- arrange(forfatalities,desc(forfatalities[,2]))
+forfatalities$EVTYPE <- as.factor(forfatalities$EVTYPE)
+ff <- head(forfatalities,8)
+ff$EVTYPE <- as.factor(ff$EVTYPE)
+forinjuries <- aggregate(INJURIES ~ EVTYPE,read,"sum")
+forinjuries <- arrange(forinjuries,desc(forinjuries[,2]))
+forinjuries$EVTYPE <- as.factor(forinjuries$EVTYPE)
+fi <- head(forinjuries,8)
+fi$EVTYPE <- as.factor(fi$EVTYPE)
+```
+
+### Bar Plot Representation for Fatalities and Injuries Repectively.
+```{r}
+par(mfrow = c(1, 2), las = 3, cex = 0.7, cex.main = 1.4, cex.lab = 1.2)
+barplot(names.arg = ff$EVTYPE , ff$FATALITIES,col= "maroon",main="FATALITIES")
+barplot(names.arg = fi$EVTYPE , fi$INJURIES,col= "grey",main="INJURIES")
+```
+
+### Finding the final Population/Human Damage the Events causes.
+## Results : 
+```{r}
+finalhumandamage <- aggregate(read$FATALITIES+read$INJURIES , by= list(read$EVTYPE),"sum")
+finalhumandamage <- arrange(finalhumandamage,desc(finalhumandamage[,2]))
+fhd <- head(finalhumandamage,8)
+head(fhd)
+par(mfrow = c(1, 1), las = 3, cex = 0.7, cex.main = 1.4, cex.lab = 1.2)
+barplot(names.arg = fhd$Group.1,fhd$x,col="darkgreen",main="Final Most Human Damage Causing EVTYPE")
+```
+## Thus, the final graph , where we have added the Injuries and Fatalities suggests that the most number of Damages are done by TORNADOs.
+
+
+
+
+## 2.Addressing the problem finding greatest economic consequences.
+
+
+### Damage done to the Properties and Crops.
+```{r}
+forproperties <- aggregate(read$PROPDMG,by=list(read$EVTYPE),"sum")
+forproperties <- arrange(forproperties,desc(forproperties[,2]))
+forproperties$Group.1 <- as.factor(forproperties$Group.1)
+fp <- head(forproperties,8)
+
+forcrops <- aggregate(read$CROPDMG,by=list(read$EVTYPE),"sum")
+forcrops <- arrange(forcrops,desc(forcrops[,2]))
+forcrops$Group.1 <- as.factor(forcrops$Group.1)
+fc <- head(forcrops,8)
+```
+
+### Bar Plot Representation for Properties and Crops Repectively.
+```{r}
+par(mfrow = c(1, 2), las = 3, cex = 0.7, cex.main = 1.4, cex.lab = 1.2)
+barplot(names.arg= fp$Group.1,fp$x,col="darkblue",main="PROPERTY DAMAGE")
+barplot(names.arg= fc$Group.1,fc$x,col="orange",main="CROPS DAMAGE")
+```
+
+### Final damage done to the Crops and Properties and finding the Event causing most damage.
+## Results : 
+```{r}
+finaldamage <- aggregate(read$PROPDMG+read$CROPDMG,by=list(read$EVTYPE),"sum")
+finaldamage <- arrange(finaldamage,desc(finaldamage[,2]))
+fd <- head(finaldamage,8)
+par(mfrow = c(1, 1), las = 3, cex = 0.7, cex.main = 1.4, cex.lab = 1.2)
+barplot(names.arg=fd$Group.1,fd$x,col="brown",main="Final most Economic Damage causing EVTYPE")
+```
+
+
+
+
+## Thus the final Graph suggests  that the most damages are done by the TORNADOs.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
